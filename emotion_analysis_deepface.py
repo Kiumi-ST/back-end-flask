@@ -1,8 +1,9 @@
 from deepface import DeepFace
 import cv2
 import numpy as np
+from model import db, UserDifficultyPage
 
-def analyze_emotion_deepface(file):
+def analyze_emotion_deepface(file, screen_name):
   # 파일을 읽어서 OpenCV 이미지로 변환
   file_bytes = np.frombuffer(file.read(), np.uint8)
   image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
@@ -24,6 +25,12 @@ def analyze_emotion_deepface(file):
       difficult_emotions = ['angry', 'disgust', 'fear', 'sad', 'surprise']
       # 감정 상태 중 하나라도 부정적이라면 isDifficult를 True로 설정(임계값: 0.5)
       is_difficult = any(emotions[emotion] > 0.5 for emotion in difficult_emotions)
+
+      # 감정이 부정적이라고 판단된 경우 DB에 화면 이름과 감정 상태를 저장
+      if is_difficult:
+        new_entry = UserDifficultyPage(screen_name=screen_name, emotion=dominant_emotion)
+        db.session.add(new_entry)
+        db.session.commit()
 
     return {"isDifficult": is_difficult, "dominantEmotion": dominant_emotion}
   
