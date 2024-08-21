@@ -8,6 +8,9 @@ def analyze_emotion_deepface(file, screen_name):
   file_bytes = np.frombuffer(file.read(), np.uint8)
   image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
 
+  # 이미지 크기 축소
+  image = cv2.resize(image, (0,0), fx=0.5, fy=0.5)
+
   try:
     # DeepFace를 사용하여 표정 인식 
     # (얼굴이 감지되지 않았을 때 error가 나지 않게 하는 방법: enforce_detection=False 추가)
@@ -35,6 +38,10 @@ def analyze_emotion_deepface(file, screen_name):
     return {"isDifficult": is_difficult, "dominantEmotion": dominant_emotion}
   
   except ValueError as e:
-    # 얼굴이 감지되지 않았을 때 예외 처리
-    return {'error': str(e)}
+    # 얼굴이 감지되지 않았을 때의 예외 처리
+    return {'error': 'No face detected.'}
+  
+  except Exception as e:
+    # 기타 예외 처리
+    return {'error': f'An error occurred: {str(e)}'}
 

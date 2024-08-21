@@ -39,17 +39,16 @@ def analyze_deepface():
   file = request.files['file']
   screen_name = request.form.get('screen_name')
 
-  if file.filename == '':
+  if not file.filename:
     return jsonify({'error': 'No selected file'}), 400
   if not screen_name:
     return jsonify({'error': 'No screen name provided'}), 400
 
-  if file:
-    # 파일과 화면 이름을 분석 함수로 전달
-    result = analyze_emotion_deepface(file, screen_name)
-    if 'error' in result:
-      return jsonify(result), 500
-    return jsonify(result)
+  # 파일과 화면 이름을 분석 함수로 전달
+  result = analyze_emotion_deepface(file, screen_name)
+  if 'error' in result:
+    return jsonify(result), 500
+  return jsonify(result)
 
 @app.route('/') # 서버 테스트
 def home():
