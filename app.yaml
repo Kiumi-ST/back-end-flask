@@ -1,0 +1,13 @@
+runtime: custom
+env: flex
+
+resources:
+  cpu: 1
+  memory_gb: 4
+  disk_size_gb: 20
+
+env_variables:
+  DATABASE_URI: "projects/390459592108/secrets/DATABASE_URI/versions/1"
+
+manual_scaling:
+  instances: 1

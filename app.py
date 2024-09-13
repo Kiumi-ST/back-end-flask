@@ -1,9 +1,7 @@
 from flask import Flask, request, jsonify
 from model import db
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
+from google.cloud import secretmanager
 
 # 환경 변수 설정 (oneDNN 옵션 비활성화)
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
@@ -18,6 +16,20 @@ from emotion_analysis_deepface import analyze_emotion_deepface
 app = Flask(__name__)
 
 # MySQL 데이터베이스 URI 설정
+# Secret Manager에서 비밀을 가져오는 함수
+def get_secret(project_id, secret_id):
+  client = secretmanager.SecretManagerServiceClient()
+  secret_name = f"projects/{project_id}/secrets/{secret_id}/versions/1"
+  response = client.access_secret_version(name=secret_name)
+  secret_value = response.payload.data.decode("UTF-8")
+  return secret_value
+
+# Secret Manager에서 비밀 값을 가져와 환경 변수로 설정
+project_id = "390459592108"
+secret_id = "DATABASE_URI"
+os.environ['DATABASE_URI'] = get_secret(project_id, secret_id)
+
+# Flask 앱 설정에 환경 변수를 사용
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
